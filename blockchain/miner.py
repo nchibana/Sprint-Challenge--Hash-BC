@@ -1,6 +1,6 @@
 import hashlib
 import requests
-
+import json
 import sys
 
 from uuid import uuid4
@@ -24,10 +24,18 @@ def proof_of_work(last_proof):
 
     print("Searching for next proof")
     proof = 0
-    #  TODO: Your code here
 
+    proof_string = json.dumps(last_proof, sort_keys=True)
+    encoded_proof = f'{proof_string}'.encode()
+    last_hash = hashlib.sha256(encoded_proof).hexdigest()
+
+    while valid_proof(last_hash, proof) is False:
+        proof +=1
+        # proof = random.randint(0, sys.maxsize)
+ 
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
+
 
 
 def valid_proof(last_hash, proof):
@@ -38,9 +46,13 @@ def valid_proof(last_hash, proof):
 
     IE:  last_hash: ...AE9123456, new hash 123456E88...
     """
+    proof_string = json.dumps(proof, sort_keys=True)
 
-    # TODO: Your code here!
-    pass
+    guess = f'{proof_string}'.encode()
+
+    guess_hash = hashlib.sha256(guess).hexdigest()
+
+    return guess_hash[:6] == last_hash[-6:]
 
 
 if __name__ == '__main__':
@@ -48,12 +60,12 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         node = sys.argv[1]
     else:
-        node = "https://lambda-coin.herokuapp.com/api"
+        node = "https://lambda-coin-test-1.herokuapp.com/api"
 
     coins_mined = 0
 
     # Load or create ID
-    f = open("my_id.txt", "r")
+    f = open("C:/Users/nchib/DS5/Sprint-Challenge--Hash-BC/blockchain/my_id.txt", "r")
     id = f.read()
     print("ID is", id)
     f.close()
